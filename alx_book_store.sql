@@ -1,70 +1,36 @@
--- Create Database
-CREATE DATABASE IF NOT EXISTS alx_book_store;
+#!/usr/bin/env python3
+"""
+Script Name: MySQLServer.py
+Description:
+    This script connects to a MySQL server and creates a database
+    named 'alx_book_store' if it does not already exist.
+"""
 
--- Use the Database
-USE alx_book_store;
+import mysql.connector
 
--- ==========================================
--- TABLE: Authors
--- ==========================================
-CREATE TABLE Authors (
-    author_id INT AUTO_INCREMENT PRIMARY KEY,
-    author_name VARCHAR(215) NOT NULL
-);
+def create_database():
+    connection = None
+    try:
+        # Connect to MySQL Server (update user and password)
+        connection = mysql.connector.connect(
+            host='localhost',
+            user='root',
+            password='your_password'  # 🔸 Replace with your MySQL root password
+        )
 
--- ==========================================
--- TABLE: Books
--- ==========================================
-CREATE TABLE Books (
-    book_id INT AUTO_INCREMENT PRIMARY KEY,
-    title VARCHAR(130) NOT NULL,
-    author_id INT,
-    price DOUBLE NOT NULL,
-    publication_date DATE,
-    FOREIGN KEY (author_id) REFERENCES Authors(author_id)
-        ON DELETE SET NULL
-        ON UPDATE CASCADE
-);
+        if connection.is_connected():
+            cursor = connection.cursor()
+            cursor.execute("CREATE DATABASE IF NOT EXISTS alx_book_store")
+            print("Database 'alx_book_store' created successfully!")
 
--- ==========================================
--- TABLE: Customers
--- ==========================================
-CREATE TABLE Customers (
-    customer_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_name VARCHAR(215) NOT NULL,
-    email VARCHAR(215) UNIQUE,
-    address TEXT
-);
+    except mysql.connector.Error as err:
+        print(f"Error while connecting to MySQL: {err}")
 
--- ==========================================
--- TABLE: Orders
--- ==========================================
-CREATE TABLE Orders (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
-    customer_id INT,
-    order_date DATE NOT NULL,
-    FOREIGN KEY (customer_id) REFERENCES Customers(customer_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+            print("MySQL connection closed.")
 
--- ==========================================
--- TABLE: Order_Details
--- ==========================================
-CREATE TABLE Order_Details (
-    orderdetailid INT AUTO_INCREMENT PRIMARY KEY,
-    order_id INT,
-    book_id INT,
-    quantity DOUBLE NOT NULL,
-    FOREIGN KEY (order_id) REFERENCES Orders(order_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (book_id) REFERENCES Books(book_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
-
--- ==========================================
--- Optional: Display success message
--- ==========================================
--- SELECT 'Database and tables created successfully!' AS message;
+if __name__ == "__main__":
+    create_database()
